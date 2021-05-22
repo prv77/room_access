@@ -2,7 +2,6 @@ package org.system.control.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.system.control.dto.Limit;
 import org.system.control.dto.entity.Key;
@@ -21,9 +20,10 @@ public class AccessService {
     private final VisitorService visitorService;
     private final Limit limit;
 
-    public HttpStatus process(String roomId, boolean entrance, String keyId) {
+    public String process(String roomId, boolean entrance, String keyId) {
 
-        if(limit.getRoomLimit() < Integer.parseInt(roomId) || limit.getUserLimit() < Integer.parseInt(keyId)) {
+        if(limit.getRoomLimit() < Integer.parseInt(roomId) || limit.getUserLimit() < Integer.parseInt(keyId)
+            || Integer.parseInt(roomId) == 0) {
             log.error("Deny access, action={}, wrong incoming data, limit's has been reached: room id={}, key id={}", getAction(entrance), roomId, keyId);
             throw new ApiException(ErrorCode.deny);
         }
@@ -68,7 +68,7 @@ public class AccessService {
         }
 
         log.info("Allow access for user={}, room={}, action={}",user, room, getAction(entrance));
-        return HttpStatus.OK;
+        return ErrorCode.allow.getStringValue();
     }
 
     private String getAction(boolean entrance) {
